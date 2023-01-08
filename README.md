@@ -3,6 +3,11 @@ OLED Scroll Algorithm
 
 This algorithm will scroll a long text string across an SSD1306 OLED display.
 
+Links
+-----
+
+- [Digi-Key: SSD1306 Datasheet](https://www.digikey.com/htmldatasheets/production/2047793/0/0/1/ssd1306.html#pf2c)
+
 Credits
 -------
 
