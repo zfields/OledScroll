@@ -2,30 +2,63 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define OLED_DC    11
-#define OLED_CS    12
-#define OLED_CLK   10
-#define OLED_MOSI   9
-#define OLED_RESET 13
-Adafruit_SSD1306 display(OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+#define CHAR_WIDTH 6
+#define VERTICAL_OFFSET 8
+#define TEXT_SIZE 2
+
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
 char message[] = "Hello WOrrrrrllllllllllllllllllllllllllllldddd";
-int  x, minX;
+int  first_char_pixel, left_most_pixel;
 
 void setup() {
-  display.begin(SSD1306_SWITCHCAPVCC);
-  display.setTextSize(2);
+  // Initialize display
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+  display.setTextSize(TEXT_SIZE);
   display.setTextColor(WHITE);
   display.setTextWrap(false);
-  x    = display.width();
-  minX = -12 * strlen(message); // 12 = 6 pixels/character * text size 2
+
+  // Begin scrolling in from off-screen (right)
+  first_char_pixel = display.width();
+
+  // Calculate the left-most pixel (starting position) of the cursor
+  left_most_pixel = -1 * CHAR_WIDTH * TEXT_SIZE * strlen(message);
 }
 
 void loop() {
+  /*
+   * The screen will only display the text between pixels 0 to 132.
+   * The cursor is the beginning pixel for a string to be printed.
+   * The cursor can be moved to any non-printable position. By moving
+   * the cursor into the negative space, you achieve the effect of left
+   * scrolling, because the screen will act as a sliding window.
+   *
+   *              SSD1306 OLED:
+   *              -------------
+   * "Hello WOrrrr|rllllllllll|llllllllllllllllllldddd"
+   *              -------------
+   *   -1                    1          2         3
+   *  210987654321|01234567890|1234567890123456789012345678
+   *  <<< Negative | Positive >>>
+   *
+   * _**NOTE:** Numbers shown above represent characters, not pixels._
+   */
+
+  // Erase the contents of the display
   display.clearDisplay();
-  display.setCursor(x, 20);
+
+  // Tell the OLED display where to begin printing the message
+  display.setCursor(first_char_pixel, VERTICAL_OFFSET);
+
+  // Print the message at the cursor position
   display.print(message);
+
+  // Render the display contents
   display.display();
 
-  if(--x < minX) x = display.width();
+  // Advance the cursor into the negative space,
+  // until message is no longer visible.
+  if (--first_char_pixel < left_most_pixel) {
+    first_char_pixel = display.width();
+  }
 }
