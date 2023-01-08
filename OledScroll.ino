@@ -14,9 +14,14 @@ int  first_char_pixel, left_most_pixel;
 void setup() {
   // Initialize display
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+  display.clearDisplay();
   display.setTextSize(TEXT_SIZE);
-  display.setTextColor(WHITE);
   display.setTextWrap(false);
+
+  // By default, the background text color is transparent.
+  // Setting the text background to BLACK allows the text to
+  // scroll, without requiring the entire screen to be cleared.
+  display.setTextColor(SSD1306_WHITE, SSD1306_BLACK);
 
   // Begin scrolling in from off-screen (right)
   first_char_pixel = display.width();
@@ -43,9 +48,6 @@ void loop() {
    *
    * _**NOTE:** Numbers shown above represent characters, not pixels._
    */
-
-  // Erase the contents of the display
-  display.clearDisplay();
 
   // Tell the OLED display where to begin printing the message
   display.setCursor(first_char_pixel, VERTICAL_OFFSET);
